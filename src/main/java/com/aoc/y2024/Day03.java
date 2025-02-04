@@ -30,10 +30,11 @@ public class Day03 {
                 // walk to see if it's a valid instruction
                 int endPos = walkChar(i, instruction);
                 if (i != endPos) {
-                    System.out.println(
-                        "valid instruction found: " +
-                        instruction.substring(i, endPos + 1)
-                    );
+                    // debugging only
+                    // System.out.println(
+                    //     "valid instruction found: " +
+                    //     instruction.substring(i, endPos + 1)
+                    // );
                     String[] split = instruction
                         .substring(i, endPos + 1)
                         .split(",");
@@ -52,28 +53,68 @@ public class Day03 {
     }
 
     private Object part2() {
-        return 0;
+        List<String> instructions = getInput().toList();
+        int result = 0;
+        Boolean mulDisabled = false;
+        for (String instruction : instructions) {
+            for (int i = 0; i < instruction.length(); i++) {
+                if (instruction.charAt(i) == 'd') {
+                    int endPos = walkCharWithExpected(i, instruction, "do");
+                    if (i != endPos) {
+                        mulDisabled = false;
+                        continue;
+                    }
+                    endPos = walkCharWithExpected(i, instruction, "don't");
+                    if (i != endPos) {
+                        mulDisabled = true;
+                    }
+                }
+                if (instruction.charAt(i) == 'm') {
+                    // walk to see if it's a valid instruction
+                    int endPos = walkChar(i, instruction);
+                    if (i != endPos && !mulDisabled) {
+                        // debugging only
+                        // System.out.println(
+                        //     "valid instruction found: " +
+                        //     instruction.substring(i, endPos + 1)
+                        // );
+                        String[] split = instruction
+                            .substring(i, endPos + 1)
+                            .split(",");
+                        int left = 0;
+                        int right = 0;
+                        // should be safe
+                        left = Integer.parseInt(split[0].substring(4));
+                        right = Integer.parseInt(
+                            split[1].substring(0, split[1].length() - 1)
+                        );
+                        result += left * right;
+                    }
+                }
+            }
+        }
+        return result;
     }
 
     // TODO: this can be refined into using a tokenizer and then parse it
-    private int walkChar(int startPos, String instructions) {
+    private int walkChar(int startPos, String instruction) {
         String mulToken = "mul";
         char lParen = '(';
         char rParen = ')';
         char comma = ',';
         int readPos = startPos;
         readPos += 2;
-        if (readPos + 1 > instructions.length()) {
+        if (readPos + 1 > instruction.length()) {
             return startPos;
         }
-        if (!instructions.substring(startPos, readPos + 1).equals(mulToken)) {
+        if (!instruction.substring(startPos, readPos + 1).equals(mulToken)) {
             return startPos;
         }
         readPos += 1;
-        if (readPos >= instructions.length()) {
+        if (readPos >= instruction.length()) {
             return startPos;
         }
-        if (instructions.charAt(readPos) != lParen) {
+        if (instruction.charAt(readPos) != lParen) {
             return startPos;
         }
 
@@ -83,8 +124,8 @@ public class Day03 {
 
         int leftStartPos = readPos;
         int leftEndPos = readPos;
-        while (readPos < instructions.length()) {
-            if (instructions.charAt(readPos) == comma) {
+        while (readPos < instruction.length()) {
+            if (instruction.charAt(readPos) == comma) {
                 leftEndPos = readPos - 1;
                 break;
             }
@@ -94,8 +135,8 @@ public class Day03 {
         readPos += 1;
         int rightStartPos = readPos;
         int rightEndPos = readPos;
-        while (readPos < instructions.length()) {
-            if (instructions.charAt(readPos) == rParen) {
+        while (readPos < instruction.length()) {
+            if (instruction.charAt(readPos) == rParen) {
                 rightEndPos = readPos - 1;
                 break;
             }
@@ -105,11 +146,9 @@ public class Day03 {
         // check left and right are valid
         if (
             isValidDigits(
-                instructions.substring(leftStartPos, leftEndPos + 1)
+                instruction.substring(leftStartPos, leftEndPos + 1)
             ) &&
-            isValidDigits(
-                instructions.substring(rightStartPos, rightEndPos + 1)
-            )
+            isValidDigits(instruction.substring(rightStartPos, rightEndPos + 1))
         ) {
             return readPos;
         }
@@ -120,6 +159,39 @@ public class Day03 {
         // );
 
         return startPos; // not found
+    }
+
+    // TODO: revisit to refactor this two methods into something more re-usable like a tokenizer and a parser
+    private int walkCharWithExpected(
+        int startPos,
+        String instruction,
+        String expectedToken
+    ) {
+        char lParen = '(';
+        char rParen = ')';
+        int readPos = startPos;
+
+        readPos += expectedToken.length() - 1;
+        if (readPos + 1 > instruction.length()) {
+            return startPos;
+        }
+        if (
+            !instruction.substring(startPos, readPos + 1).equals(expectedToken)
+        ) {
+            return startPos;
+        }
+
+        readPos += 1;
+        if (instruction.charAt(readPos) != lParen) {
+            return startPos;
+        }
+
+        readPos += 1;
+        if (instruction.charAt(readPos) != rParen) {
+            return startPos;
+        }
+
+        return readPos;
     }
 
     private Boolean isValidDigits(String digits) {
