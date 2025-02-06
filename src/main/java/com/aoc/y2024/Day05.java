@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +70,41 @@ public class Day05 {
     }
 
     private Object part2() {
-        return 0;
+        SafetyManual safetyManual = parseInput();
+        int totalPageNumber = 0;
+        for (String[] update : safetyManual.getUpdates()) {
+            String middle = checkUpdate(update, safetyManual);
+            if (middle.isBlank()) {
+                String ok = middle;
+                // super hacky way to get the answer (keep doing a first pass sort until the update is valid)
+                // TODO: i feel like this can do better (maybe the sorting method is wrong)
+                while (ok.isEmpty()) {
+                    // "bubble sort" into a correct order and get the middle
+                    for (int i = update.length - 1; i >= 0; i--) {
+                        List<String> numOrderRule = safetyManual.getOrderRules(
+                            update[i]
+                        );
+                        int newIndex = -1;
+                        for (int j = i - 1; j >= 0; j--) {
+                            if (numOrderRule.contains(update[j])) {
+                                newIndex = j;
+                            }
+                        }
+                        if (newIndex != -1) {
+                            String tmp = update[i];
+                            update[i] = update[newIndex];
+                            update[newIndex] = tmp;
+                        }
+                    }
+                    ok = checkUpdate(update, safetyManual);
+                }
+
+                totalPageNumber += Integer.parseInt(
+                    update[Math.round(update.length / 2)]
+                );
+            }
+        }
+        return totalPageNumber;
     }
 
     private String checkUpdate(String[] update, SafetyManual safetyManual) {
