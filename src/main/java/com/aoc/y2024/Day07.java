@@ -54,7 +54,34 @@ public class Day07 {
     }
 
     private Object part2() {
-        return 0;
+        List<String> lines = getInput().toList();
+        long totalCalibrationResult = 0;
+        for (String line : lines) {
+            String[] equation = line.split(":");
+            String testValue = equation[0];
+            String[] values = equation[1].trim().split(" ");
+
+            List<String> possiblePositions = new ArrayList<>();
+            generateOperationPositions(possiblePositions, new char[]{'*', '+', '|'}, "", values.length - 1);
+
+            for (String position : possiblePositions) {
+                long a = Long.parseLong(values[0]);
+                long b = Long.parseLong(values[1]);
+                a = evaluate(a, b, position.charAt(0));
+                for (int i = 1; i < position.length(); i++) {
+                    b = Long.parseLong(values[i+1]);
+                    a = evaluate(a, b, position.charAt(i));
+
+                }
+
+                if (a == Long.parseLong(testValue)) {
+                    totalCalibrationResult += a;
+//                    System.out.println(Arrays.toString(values) + "|" + position + "=" + a);
+                    break;
+                }
+            }
+        }
+        return totalCalibrationResult;
     }
 
     private void generateOperationPositions(List<String> possiblePositions, char[] operators, String positions, int length) {
@@ -71,6 +98,7 @@ public class Day07 {
         return switch (operator) {
             case '*' -> a * b;
             case '+' -> a + b;
+            case '|' -> Long.parseLong(a + "" + b); // cheat way? maybe can challenge myself to generate this via math
             default -> 0;
         };
     }
