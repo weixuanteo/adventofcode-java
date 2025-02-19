@@ -15,10 +15,12 @@ public class Day09 {
     }
 
     private void run() {
+        long part1StartTime = System.currentTimeMillis();
         Object part1Answer = part1();
-        System.out.println("Part 1: " + part1Answer);
+        System.out.println("Part 1: " + part1Answer + ", Time taken: " + (System.currentTimeMillis() - part1StartTime) + " ms");
+        long part2StartTime = System.currentTimeMillis();
         Object part2Answer = part2();
-        System.out.println("Part 2: " + part2Answer);
+        System.out.println("Part 2: " + part2Answer + ", Time taken: " + (System.currentTimeMillis() - part2StartTime) + " ms");
     }
 
     private Object part1() {
@@ -82,6 +84,7 @@ public class Day09 {
             id += 1;
         }
 
+        // TODO: refine this in the future, can make it faster
         id--;
         while (id > 0) {
             int l = 0;
