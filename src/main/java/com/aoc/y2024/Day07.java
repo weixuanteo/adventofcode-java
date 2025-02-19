@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 
 public class Day07 {
 
-
-
     public static void main(String[] args) {
         new Day07().run();
     }
